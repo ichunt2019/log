@@ -1,15 +1,8 @@
 # log
 20201203最新版本log
-package logger
-
-import (
-	"testing"
-	"time"
-)
 
 
-
-
+``````
 func TestLog(t *testing.T){
 	for i:=0;i<=100;i++{
 		go func() {
@@ -45,3 +38,4 @@ func TestLog(t *testing.T){
 	time.Sleep(time.Second*10000)
 
 }
+``````
