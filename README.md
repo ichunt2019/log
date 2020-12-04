@@ -39,3 +39,8 @@ func TestLog(t *testing.T){
 
 }
 ``````
+
+elk日志格式：
+```
+{"msg":"5555555555555555555555555","dateStr":"2020-12-04 15:27:34.602","levelStr":"INFO","fileName":"asm_amd64.s","method":"runtime.goexit","lineNo":1337}
+```
