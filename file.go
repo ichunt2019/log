@@ -31,6 +31,8 @@ func NewFileLogger(config map[string]string) (log LogInterface, err error) {
 	logName, ok := config["log_name"]
 	if !ok {
 		logName = time.Now().Format("2006-01-02")
+	}else{
+		logName = logName+"_"+time.Now().Format("2006-01-02")
 	}
 
 	logLevel, ok := config["log_level"]

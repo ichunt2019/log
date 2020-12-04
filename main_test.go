@@ -17,6 +17,7 @@ func TestLog(t *testing.T){
 			logConfig := make(map[string]string)
 			logConfig["log_path"] = "logs/test1"
 			logConfig["log_chan_size"] = "10"
+			logConfig["log_name"] = "xxxxx"
 			log ,_:=InitLogger("file",logConfig)
 			log.Init()
 
