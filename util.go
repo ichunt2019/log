@@ -8,13 +8,14 @@ import (
 )
 
 type LogData struct {
-	Message      string
-	TimeStr      string
-	LevelStr     string
-	Filename     string
-	FuncName     string
-	LineNo       int
-	WarnAndFatal bool
+	Message      string `json:"msg"`
+	TimeStr      string `json:"dateStr"`
+	LevelStr     string `json:"levelStr"`
+	Filename     string `json:"fileName"`
+	FuncName     string `json:"method"`
+	LineNo       int `json:"lineNo"`
+	WarnAndFatal bool `json:"warnAndFatal"`
+	Req string `json:"request"`
 }
 
 //util.go 10

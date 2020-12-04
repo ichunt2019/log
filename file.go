@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -233,8 +234,14 @@ func (f *FileLogger) writeLogBackground() {
 		}
 
 		f.checkSplitFile(logData.WarnAndFatal)
-		fmt.Fprintf(file, "%s %s (%s:%s:%d) %s\n", logData.TimeStr,
-			logData.LevelStr, logData.Filename, logData.FuncName, logData.LineNo, logData.Message)
+		//fmt.Fprintf(file, "%s %s (%s:%s:%d) %s\n", logData.TimeStr,
+		//	logData.LevelStr, logData.Filename, logData.FuncName, logData.LineNo, logData.Message)
+		str,err :=json.Marshal(logData)
+		if err == nil{
+			fmt.Fprintf(file, string(str)+"\n")
+		}
+
+
 	}
 }
 

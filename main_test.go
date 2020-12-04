@@ -9,6 +9,9 @@ import (
 
 
 func TestLog(t *testing.T){
+
+
+
 	for i:=0;i<=100;i++{
 		go func() {
 			logConfig := make(map[string]string)
@@ -36,10 +39,13 @@ func TestLog(t *testing.T){
 				log1.Warn("666666666666666666666")
 				log1.Info("66666666666666666666")
 				log1.Error("66666666666666666666")
-				log1.Fatal("666666666666666666666")
+				log1.Fatal("666666666\"6666\"66666666")
 			}
 		}()
 	}
-	time.Sleep(time.Second*10000)
+
+
+
+	time.Sleep(time.Second*5)
 
 }
