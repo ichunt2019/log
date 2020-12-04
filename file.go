@@ -239,6 +239,8 @@ func (f *FileLogger) writeLogBackground() {
 		//fmt.Fprintf(file, "%s %s (%s:%s:%d) %s\n", logData.TimeStr,
 		//	logData.LevelStr, logData.Filename, logData.FuncName, logData.LineNo, logData.Message)
 		str,err :=json.Marshal(logData)
+		//fmt.Println(file.Name())
+		//fmt.Println(string(str))
 		if err == nil{
 			fmt.Fprintf(file, string(str)+"\n")
 		}
