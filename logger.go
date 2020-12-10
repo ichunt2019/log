@@ -11,6 +11,7 @@ file, "初始化一个文件日志实例"
 console, "初始化console日志实例"
 */
 func InitLogger(name string, config map[string]string) (log LogInterface,err error) {
+
 	switch name {
 	case "file":
 		log, err = NewFileLogger(config)

@@ -27,12 +27,26 @@ func (c *ConsoleLogger) Init() {
 
 }
 
+
+
 func (c *ConsoleLogger) SetLevel(level int) {
 	if level < LogLevelDebug || level > LogLevelFatal {
 		level = LogLevelDebug
 	}
 
 	c.level = level
+}
+
+func (c *ConsoleLogger) syncAdd()  {
+
+}
+
+func (c *ConsoleLogger) syncDone()  {
+
+}
+
+func (c *ConsoleLogger) SyncWait()  {
+
 }
 
 func (c *ConsoleLogger) Debug(format string, args ...interface{}) {

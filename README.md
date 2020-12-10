@@ -2,6 +2,17 @@
 20201203最新版本log
 
 
+## 部分参数说明
+
+```json
+log_chan_size 最高协程处理日志
+log_path     日志路径 默认为logs
+log_name     文件前缀 如果是 "save" 文件名将是 save_20201210
+open_sync    如果值是 "1" 允许开启同步(可使用 wait方法阻塞直至日志完全存入文件,一般用于一次性处理脚本)
+     
+```
+
+## 示例
 ``````
 func TestLog(t *testing.T){
 	for i:=0;i<=100;i++{

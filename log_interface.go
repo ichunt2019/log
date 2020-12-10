@@ -10,4 +10,10 @@ type LogInterface interface {
 	Error(format string, args ...interface{})
 	Fatal(format string, args ...interface{})
 	Close()
+	//以下三个为同步参数
+	syncAdd()
+	syncDone()
+	SyncWait()
+
+
 }

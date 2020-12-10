@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -12,11 +13,13 @@ import (
 //2006-01-02 15:04:05.999
 type FileLogger struct {
 	level         int
+	openSync      int    //1开启同步 其他异步
 	logPath       string
 	logName       string
 	file          *os.File
 	warnFile      *os.File
 	LogDataChan   chan *LogData
+	LogSync        sync.WaitGroup
 	logSplitType  int
 	logSplitSize  int64
 	lastSplitHour int
@@ -38,6 +41,15 @@ func NewFileLogger(config map[string]string) (log LogInterface, err error) {
 	logLevel, ok := config["log_level"]
 	if !ok {
 		logLevel = "DEBUG"
+	}
+
+	//是否开启同步
+	logOpenSync, ok := config["open_sync"]
+	var openSync int
+	if !ok {
+		openSync= 0
+	}else{
+		openSync,_=strconv.Atoi(logOpenSync)
 	}
 
 	logChanSize, ok := config["log_chan_size"]
@@ -76,6 +88,7 @@ func NewFileLogger(config map[string]string) (log LogInterface, err error) {
 	level := getLogLevel(logLevel)
 	log = &FileLogger{
 		level:         level,
+		openSync:      openSync,
 		logPath:       logPath,
 		logName:       logName,
 		LogDataChan:   make(chan *LogData, chanSize),
@@ -95,6 +108,8 @@ func createFile(filePath string)  error  {
 	}
 	return nil
 }
+
+
 
 // 判断所给路径文件/文件夹是否存在(返回true是存在)
 func isExist(path string) bool {
@@ -127,6 +142,24 @@ func (f *FileLogger) Init() {
 
 	f.warnFile = file
 	go f.writeLogBackground()
+}
+
+func (f *FileLogger) syncAdd()  {
+	if f.openSync==1{
+		f.LogSync.Add(1)
+	}
+}
+
+func (f *FileLogger) syncDone()  {
+	if f.openSync==1{
+		f.LogSync.Done()
+	}
+}
+
+func (f *FileLogger) SyncWait()  {
+	if f.openSync==1{
+		f.LogSync.Wait()
+	}
 }
 
 func (f *FileLogger) splitFileHour(warnFile bool) {
@@ -241,6 +274,7 @@ func (f *FileLogger) writeLogBackground() {
 		str,err :=json.Marshal(logData)
 		//fmt.Println(file.Name())
 		//fmt.Println(string(str))
+		f.syncDone()
 		if err == nil{
 			fmt.Fprintf(file, string(str)+"\n")
 		}
@@ -286,6 +320,7 @@ func (f *FileLogger) Info(format string, args ...interface{}) {
 	logData := writeLog(LogLevelInfo, format, args...)
 	select {
 	case f.LogDataChan <- logData:
+		f.syncAdd()
 	default:
 	}
 }
@@ -298,6 +333,7 @@ func (f *FileLogger) Warn(format string, args ...interface{}) {
 	logData := writeLog(LogLevelWarn, format, args...)
 	select {
 	case f.LogDataChan <- logData:
+		f.LogSync.Add(1)
 	default:
 	}
 }
@@ -309,6 +345,7 @@ func (f *FileLogger) Error(format string, args ...interface{}) {
 	logData := writeLog(LogLevelError, format, args...)
 	select {
 	case f.LogDataChan <- logData:
+		f.LogSync.Add(1)
 	default:
 	}
 }
@@ -321,6 +358,7 @@ func (f *FileLogger) Fatal(format string, args ...interface{}) {
 	logData := writeLog(LogLevelFatal, format, args...)
 	select {
 	case f.LogDataChan <- logData:
+		f.LogSync.Add(1)
 	default:
 	}
 }
