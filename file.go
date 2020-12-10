@@ -298,6 +298,7 @@ func (f *FileLogger) Debug(format string, args ...interface{}) {
 	logData := writeLog(LogLevelDebug, format, args...)
 	select {
 	case f.LogDataChan <- logData:
+		f.syncAdd()
 	default:
 	}
 }
@@ -309,6 +310,7 @@ func (f *FileLogger) Trace(format string, args ...interface{}) {
 	logData := writeLog(LogLevelTrace, format, args...)
 	select {
 	case f.LogDataChan <- logData:
+		f.syncAdd()
 	default:
 	}
 }

@@ -12,6 +12,7 @@ open_sync    如果值是 "1" 允许开启同步(可使用 wait方法阻塞直�
      
 ```
 
+
 ## 示例
 ``````
 func TestLog(t *testing.T){
@@ -50,6 +51,35 @@ func TestLog(t *testing.T){
 
 }
 ``````
+
+## 同步示例
+
+```go
+
+import (
+	"github.com/ichunt2019/log"
+)
+
+fun main(){
+logConfig := make(map[string]string)
+	logConfig["log_path"] = "logs/test1"
+	logConfig["log_chan_size"] = "1000"
+	logConfig["log_name"] = "xxxxx"
+	logConfig["open_sync"] = "1"
+	log ,_:=logger.InitLogger("file",logConfig)
+	log.Init()
+	log.Info("6666")
+	log.Info("7777")
+	log.Info("88888")
+	log.Info("99999")
+	log.SyncWait()
+}
+
+
+
+
+
+```
 
 elk日志格式：
 ```
