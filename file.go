@@ -302,7 +302,7 @@ func (f *FileLogger) Debug(format string, args ...interface{}) {
 	f.syncAdd()
 	f.LogDataChan <- logData
 
-	//select 会有bug,如果管道 LogDataChan容量不够,会丢失数据
+	//select 会有bug,如 果管道 LogDataChan容量不够,会丢失数据
 	/*select {
 	case f.LogDataChan <- logData:
 		f.syncAdd()
