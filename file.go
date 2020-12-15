@@ -146,6 +146,7 @@ func (f *FileLogger) Init() {
 
 func (f *FileLogger) syncAdd()  {
 	if f.openSync==1{
+		fmt.Println("add")
 		f.LogSync.Add(1)
 	}
 }
@@ -157,6 +158,14 @@ func (f *FileLogger) syncDone()  {
 }
 
 func (f *FileLogger) SyncWait()  {
+	/*for  {
+		fmt.Println("外面数量为",len(f.LogDataChan))
+		if(len(f.LogDataChan)==0){
+			fmt.Println("break数量为",len(f.LogDataChan))
+			break
+		}
+	}*/
+
 	if f.openSync==1{
 		f.LogSync.Wait()
 	}
@@ -274,6 +283,7 @@ func (f *FileLogger) writeLogBackground() {
 		str,err :=json.Marshal(logData)
 		//fmt.Println(file.Name())
 		//fmt.Println(string(str))
+		//fmt.Println("init 里面")
 		f.syncDone()
 		if err == nil{
 			fmt.Fprintf(file, string(str)+"\n")
@@ -320,11 +330,15 @@ func (f *FileLogger) Info(format string, args ...interface{}) {
 		return
 	}
 	logData := writeLog(LogLevelInfo, format, args...)
-	select {
+	//@author wangsong
+	f.syncAdd()
+	f.LogDataChan <- logData //通道不够就应该阻塞
+
+	// select 不适合在此处理 会引发bug,当LogDataChan 通道不够的时候,会丢失日志
+	/*select {
 	case f.LogDataChan <- logData:
-		f.syncAdd()
 	default:
-	}
+	}*/
 }
 
 func (f *FileLogger) Warn(format string, args ...interface{}) {
