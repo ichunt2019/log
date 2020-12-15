@@ -146,7 +146,6 @@ func (f *FileLogger) Init() {
 
 func (f *FileLogger) syncAdd()  {
 	if f.openSync==1{
-		fmt.Println("add")
 		f.LogSync.Add(1)
 	}
 }
@@ -158,13 +157,6 @@ func (f *FileLogger) syncDone()  {
 }
 
 func (f *FileLogger) SyncWait()  {
-	/*for  {
-		fmt.Println("外面数量为",len(f.LogDataChan))
-		if(len(f.LogDataChan)==0){
-			fmt.Println("break数量为",len(f.LogDataChan))
-			break
-		}
-	}*/
 
 	if f.openSync==1{
 		f.LogSync.Wait()
@@ -278,13 +270,14 @@ func (f *FileLogger) writeLogBackground() {
 		}
 
 		f.checkSplitFile(logData.WarnAndFatal)
+		f.syncDone()
 		//fmt.Fprintf(file, "%s %s (%s:%s:%d) %s\n", logData.TimeStr,
 		//	logData.LevelStr, logData.Filename, logData.FuncName, logData.LineNo, logData.Message)
 		str,err :=json.Marshal(logData)
 		//fmt.Println(file.Name())
 		//fmt.Println(string(str))
 		//fmt.Println("init 里面")
-		f.syncDone()
+
 		if err == nil{
 			fmt.Fprintf(file, string(str)+"\n")
 		}
@@ -306,11 +299,15 @@ func (f *FileLogger) Debug(format string, args ...interface{}) {
 	}
 
 	logData := writeLog(LogLevelDebug, format, args...)
-	select {
+	f.syncAdd()
+	f.LogDataChan <- logData
+
+	//select 会有bug,如果管道 LogDataChan容量不够,会丢失数据
+	/*select {
 	case f.LogDataChan <- logData:
 		f.syncAdd()
 	default:
-	}
+	}*/
 }
 
 func (f *FileLogger) Trace(format string, args ...interface{}) {
@@ -318,11 +315,9 @@ func (f *FileLogger) Trace(format string, args ...interface{}) {
 		return
 	}
 	logData := writeLog(LogLevelTrace, format, args...)
-	select {
-	case f.LogDataChan <- logData:
-		f.syncAdd()
-	default:
-	}
+	f.syncAdd()
+	f.LogDataChan <- logData
+
 }
 
 func (f *FileLogger) Info(format string, args ...interface{}) {
@@ -333,12 +328,6 @@ func (f *FileLogger) Info(format string, args ...interface{}) {
 	//@author wangsong
 	f.syncAdd()
 	f.LogDataChan <- logData //通道不够就应该阻塞
-
-	// select 不适合在此处理 会引发bug,当LogDataChan 通道不够的时候,会丢失日志
-	/*select {
-	case f.LogDataChan <- logData:
-	default:
-	}*/
 }
 
 func (f *FileLogger) Warn(format string, args ...interface{}) {
@@ -347,11 +336,8 @@ func (f *FileLogger) Warn(format string, args ...interface{}) {
 	}
 
 	logData := writeLog(LogLevelWarn, format, args...)
-	select {
-	case f.LogDataChan <- logData:
-		f.LogSync.Add(1)
-	default:
-	}
+	f.syncAdd()
+	f.LogDataChan <- logData //通道不够就应该阻塞
 }
 
 func (f *FileLogger) Error(format string, args ...interface{}) {
@@ -359,24 +345,17 @@ func (f *FileLogger) Error(format string, args ...interface{}) {
 		return
 	}
 	logData := writeLog(LogLevelError, format, args...)
-	select {
-	case f.LogDataChan <- logData:
-		f.LogSync.Add(1)
-	default:
-	}
+	f.syncAdd()
+	f.LogDataChan <- logData //通道不够就应该阻塞
 }
 
 func (f *FileLogger) Fatal(format string, args ...interface{}) {
 	if f.level > LogLevelFatal {
 		return
 	}
-
 	logData := writeLog(LogLevelFatal, format, args...)
-	select {
-	case f.LogDataChan <- logData:
-		f.LogSync.Add(1)
-	default:
-	}
+	f.syncAdd()
+	f.LogDataChan <- logData //通道不够就应该阻塞
 }
 
 func (f *FileLogger) Close() {
